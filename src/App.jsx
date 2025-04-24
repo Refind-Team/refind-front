@@ -1,11 +1,11 @@
-import './App.css'
+import Home from "./assets/pages/Home";
 function App() {
   return (
-    <>
-      <h1 className='text-4xl'>Refind</h1>
-      <p className='text-2xl'>Sistema de achados e perdidos</p> 
-    </>
-  )
+    <div className="max-w-7xl m-auto h-full">
+      <Home/>
+      
+    </div>
+  );
 }
 
-export default App
+export default App;
