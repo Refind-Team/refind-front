@@ -29,10 +29,34 @@ function Home() {
   // State local
   const [currentItem, setCurrentItem] = useState(null);
   const [accessCode, setAccessCode] = useState("");
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null); // falta implementar
+  const [selectedItem, setSelectedItem] = useState(null);
   const [itemToDelete, setItemToDelete] = useState(null);
+  const [filters, setFilters] = useState({
+    search: "",
+    type: "Todos",
+    category: "",
+    location: "",
+  });
 
+  const handleSearch = (term) => {
+    setFilters((prev) => ({ ...prev, search: term }));
+  };
+
+  const handleTypeChange = (type) => {
+    setFilters((prev) => ({ ...prev, type }));
+  };
+
+  const handleFilterApply = (filters) => {
+    setFilters((prev) => ({ ...prev, ...filters }));
+  };
+
+  const handleClearFilters = () => {
+    setFilters((prev) => ({
+      ...prev,
+      category: "",
+      location: "",
+    }));
+  };
   // Handlers
   const handleViewDetails = (item) => {
     setSelectedItem(item);
@@ -69,19 +93,20 @@ function Home() {
 
   const handleAccessWithCode = async () => {
     try {
-      setIsProcessing(true);
       const item = await getItemByCode(accessCode);
+
       if (item) {
         setCurrentItem(item);
         modals.edit.open();
         modals.code.close();
         setAccessCode("");
+        return true;
       } else {
-        alert("Código não encontrado!");
+        return false;
       }
     } catch (error) {
       console.error("Erro ao buscar item:", error);
-      alert("Ocorreu um erro ao tentar acessar o item.");
+      return false;
     }
   };
 
@@ -99,10 +124,33 @@ function Home() {
       console.error("Erro ao excluir item:", error);
     }
   };
+  const filteredItems = items.filter((item) => {
+    const statusMap = {
+      Todos: null,
+      Encontrados: "FOUND",
+      Perdidos: "LOST",
+    };
+    const mappedStatus = statusMap[filters.type];
+
+    return (
+      (filters.type === "Todos" || item.status === mappedStatus) &&
+      (!filters.search ||
+        item.name.toLowerCase().includes(filters.search.toLowerCase())) &&
+      (!filters.category || item.category === filters.category) &&
+      (!filters.location ||
+        item.location.toLowerCase().includes(filters.location.toLowerCase()))
+    );
+  });
 
   return (
-    <div>
-      <Navbar />
+    <div className="min-h-screen flex flex-col">
+      <Navbar
+        filters={filters}
+        onSearch={handleSearch}
+        onTypeChange={handleTypeChange}
+        onFilterApply={handleFilterApply}
+        onClearFilters={handleClearFilters}
+      />
       <main className="w-full m-auto p-5 mt-28 max-w-7xl">
         <h1 className="text-4xl font-semibold w-full text-center mt-4">
           Perdeu algo ou Encontrou um item?
@@ -110,8 +158,6 @@ function Home() {
         <p className=" text-2xl text-center mt-3">
           Encontre ou devolva. Registre aqui de forma simples e rápida.
         </p>
-
-        <SearchBar />
 
         <div className="my-6 border-b border-gray-200"></div>
 
@@ -144,7 +190,7 @@ function Home() {
           ) : error ? (
             <p className="text-center text-red-500">{error}</p>
           ) : (
-            <ItemList items={items} onViewDetails={handleViewDetails} />
+            <ItemList items={filteredItems} onViewDetails={handleViewDetails} />
           )}
         </div>
       </main>

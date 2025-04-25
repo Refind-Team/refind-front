@@ -1,10 +1,21 @@
-import { Controller } from "react-hook-form";
+import { Controller, useWatch, useFormContext } from "react-hook-form";
 import { IMaskInput } from "react-imask";
 import { itemFormValidation } from "../../../validation/formSchemas";
 import { useState, useEffect } from "react";
 
 const UnifiedContactInput = ({ control, name, errors }) => {
   const [inputType, setInputType] = useState("phone");
+  const { setValue } = useFormContext();
+
+  const contactValue = useWatch({ control, name });
+  useEffect(() => {
+    if (inputType === "email" && contactValue && !contactValue.includes("@")) {
+      setValue(name, "");
+    }
+    if (inputType === "phone" && contactValue && contactValue.includes("@")) {
+      setValue(name, "");
+    }
+  }, [inputType, contactValue, name, setValue]);
 
   return (
     <div className="mb-4">
@@ -42,61 +53,38 @@ const UnifiedContactInput = ({ control, name, errors }) => {
         name={name}
         control={control}
         rules={itemFormValidation.contact}
-        render={({ field }) => {
-          useEffect(() => {
-            if (
-              inputType === "email" &&
-              field.value &&
-              !field.value.includes("@")
-            ) {
-              field.onChange("");
-            }
-            if (
-              inputType === "phone" &&
-              field.value &&
-              field.value.includes("@")
-            ) {
-              field.onChange("");
-            }
-          }, [inputType]);
-
-          return (
-            <>
-              {inputType === "email" ? (
-                <input
-                  type="email"
-                  id={`${name}-email`}
-                  placeholder="email@exemplo.com"
-                  className={`w-full p-2 border rounded focus:outline-none focus:ring-1 focus:ring-blue-400 ${
-                    errors[name] ? "border-red-400" : "border-gray-300"
-                  }`}
-                  value={field.value || ""}
-                  onChange={(e) => field.onChange(e.target.value)}
-                  onBlur={field.onBlur}
-                />
-              ) : (
-                <IMaskInput
-                  id={`${name}-phone`}
-                  mask="(00) 00000-0000"
-                  definitions={{ 0: /[0-9]/ }}
-                  placeholder="(00) 00000-0000"
-                  className={`w-full p-2 border rounded focus:outline-none focus:ring-1 focus:ring-blue-400 ${
-                    errors[name] ? "border-red-500" : "border-gray-300"
-                  }`}
-                  value={field.value || ""}
-                  onAccept={(value) => field.onChange(value)}
-                  onBlur={field.onBlur}
-                />
-              )}
-              {errors[name] && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors[name].message}
-                </p>
-              )}
-            </>
-          );
-        }}
+        render={({ field }) =>
+          inputType === "email" ? (
+            <input
+              type="email"
+              id={`${name}-email`}
+              placeholder="email@exemplo.com"
+              className={`w-full p-2 border rounded focus:outline-none focus:ring-1 focus:ring-blue-400 ${
+                errors[name] ? "border-red-400" : "border-gray-300"
+              }`}
+              value={field.value || ""}
+              onChange={(e) => field.onChange(e.target.value)}
+              onBlur={field.onBlur}
+            />
+          ) : (
+            <IMaskInput
+              id={`${name}-phone`}
+              mask="(00) 00000-0000"
+              definitions={{ 0: /[0-9]/ }}
+              placeholder="(00) 00000-0000"
+              className={`w-full p-2 border rounded focus:outline-none focus:ring-1 focus:ring-blue-400 ${
+                errors[name] ? "border-red-500" : "border-gray-300"
+              }`}
+              value={field.value || ""}
+              onAccept={(value) => field.onChange(value)}
+              onBlur={field.onBlur}
+            />
+          )
+        }
       />
+      {errors[name] && (
+        <p className="text-red-500 text-sm mt-1">{errors[name].message}</p>
+      )}
     </div>
   );
 };

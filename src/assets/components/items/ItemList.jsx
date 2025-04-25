@@ -1,4 +1,3 @@
-import React, { useState, useEffect } from "react";
 import ItemCard from "./ItemCard";
 import { Turtle } from "lucide-react";
 
