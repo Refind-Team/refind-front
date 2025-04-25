@@ -45,7 +45,7 @@ const SearchBar = ({
   };
 
   const containerClasses = isInNavbar
-    ? "relative w-full max-w-md"
+    ? "relative w-full max-w-sm"
     : "w-full flex flex-col gap-4 mt-16";
 
   return (

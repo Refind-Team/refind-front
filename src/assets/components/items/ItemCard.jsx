@@ -8,7 +8,6 @@ const ItemCard = ({ item }) => {
     ? "bg-red-100 text-red-700"
     : "bg-green-100 text-green-700";
 
-
   return (
     <div className="bg-[#f4f4f4] shadow-md rounded-xl p-4 flex gap-4 items-start h-full">
       <div className="w-24 h-24 sm:w-30 sm:h-30 md:w-35 md:h-35 lg:w-30 lg:h-30 flex-shrink-0 rounded-md overflow-hidden bg-gray-100">
@@ -47,15 +46,14 @@ const ItemCard = ({ item }) => {
           </p>
         )}
         <div className="mt-5">
-        {item.date && (
-          <p className="text-xs text-gray-500 line-clamp-1">Data: {item.date}</p>
-        )}
+          {item.date && (
+            <p className="text-xs text-gray-500 line-clamp-1">
+              Data: {item.date}
+            </p>
+          )}
         </div>
-        
       </div>
-      
     </div>
   );
-
 };
 export default ItemCard;

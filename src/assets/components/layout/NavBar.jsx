@@ -25,7 +25,7 @@ const Navbar = ({
           <span className="text-white font-bold text-lg">Refind</span>
         </div>
 
-        <div className="hidden sm:flex items-center gap-4">
+        <div className="hidden md:flex items-center justify-between flex-1 gap-4">
           {menuItems.map((item) => (
             <button
               key={item}
@@ -40,7 +40,7 @@ const Navbar = ({
             </button>
           ))}
 
-          <div className="flex-grow flex justify-center mx-2">
+          <div className="flex-grow flex justify-center mx-4">
             <SearchBar
               isInNavbar={true}
               filters={filters}

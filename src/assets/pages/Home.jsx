@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Navbar from "../components/layout/NavBar";
 import SearchBar from "../components/SearchBar";
 import Footer from "../components/layout/Footer";
+import Header from "../components/layout/Header";
 import AddItemFloatingButton from "../components/AddItemFloatingButton";
 import ModalForm from "../components/modais/ModalForm";
 import ModalSuccess from "../components/modais/ModalSuccess";
@@ -152,15 +153,8 @@ function Home() {
         onClearFilters={handleClearFilters}
       />
       <main className="w-full m-auto p-5 mt-28 max-w-7xl">
-        <h1 className="text-4xl font-semibold w-full text-center mt-4">
-          Perdeu algo ou Encontrou um item?
-        </h1>
-        <p className=" text-2xl text-center mt-3">
-          Encontre ou devolva. Registre aqui de forma simples e rápida.
-        </p>
-
+        <Header />
         <div className="my-6 border-b border-gray-200"></div>
-
         <section className="relative w-full flex flex-col sm:flex-row justify-between items-center gap-6 mt-16">
           <button
             onClick={handleAddItem}
