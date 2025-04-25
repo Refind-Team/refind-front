@@ -17,7 +17,6 @@ export function useModals() {
   const openCodeModal = () => setCodeModalOpen(true);
   const closeCodeModal = () => setCodeModalOpen(false);
 
-  //vai ser implementado ainda
   const openDetailsModal = () => setDetailsModalOpen(true);
   const closeDetailsModal = () => setDetailsModalOpen(false);
 

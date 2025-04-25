@@ -1,99 +1,115 @@
 import { useState } from "react";
-import { Search, ListFilterPlus } from "lucide-react";
-import Input from "./inputs/Input";
+import { Search, ListFilterPlus, X } from "lucide-react";
 import Select from "./inputs/Select";
 
-const SearchBar = () => {
-  const [searchTerm, setSearchTerm] = useState("");
+const SearchBar = ({
+  isInNavbar = false,
+  filters = {},
+  onSearch,
+  onFilterApply,
+  onClearFilters,
+}) => {
+
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [tempFilters, setTempFilters] = useState({
+    category: filters.category || "",
+    location: filters.location || "",
+  });
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    console.log("procurando por:", searchTerm);
-    // lógica aqui depois
+  const handleInputChange = (e) => {
+    onSearch(e.target.value); 
   };
 
-  const toggleFilter = () => {
-    setIsFilterOpen(!isFilterOpen);
+  const handleCategoryChange = (value) => {
+    setTempFilters((prev) => ({ ...prev, category: value }));
   };
 
-  const handleCancelFilter = () => {
+  const handleLocationChange = (e) => {
+    setTempFilters((prev) => ({ ...prev, location: e.target.value }));
+  };
+
+  const handleApplyFilters = () => {
+    onFilterApply(tempFilters);
     setIsFilterOpen(false);
   };
 
-  return (
-    <div className="w-full flex flex-col gap-4 mt-16">
-      <form
-        onSubmit={handleSearch}
-        className="flex sm:flex-row items-center gap-2"
-      >
-        <div className="relative w-full sm:max-w-sm flex-grow">
-          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-            <Search className="h-5 w-5 text-gray-400" />
-          </div>
-          <input
-            type="text"
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400"
-            placeholder="Procurar objeto..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
+  const toggleFilter = () => {
+    setIsFilterOpen((prev) => !prev);
+    const { category = "", location = "" } = filters;
+    setTempFilters({ category, location });
+  };
+  const handleClear = () => {
+    const cleared = { category: "", location: "" };
+    setTempFilters(cleared);
+    onClearFilters && onClearFilters(cleared);
+  };
 
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={toggleFilter}
-            className="flex items-center justify-center px-3 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-800 transition-colors cursor-pointer"
-          >
-            Filtrar
-          </button>
-        </div>
-      </form>
+  const containerClasses = isInNavbar
+    ? "relative w-full max-w-md"
+    : "w-full flex flex-col gap-4 mt-16";
+
+  return (
+    <div className={containerClasses}>
+      <div className="flex items-center bg-white rounded-full border border-gray-300 px-3 py-1 shadow-sm">
+        <Search className="h-5 w-5 text-gray-400 mr-2" />
+        <input
+          type="text"
+          className="flex-grow bg-transparent focus:outline-none text-sm"
+          placeholder="Procurar objeto..."
+          value={filters.search || ""}
+          onChange={handleInputChange}
+        />
+        <button
+          type="button"
+          onClick={toggleFilter}
+          className="ml-2 text-gray-500 hover:text-gray-700 transition-colors"
+        >
+          <ListFilterPlus className="h-5 w-5" />
+        </button>
+      </div>
 
       {isFilterOpen && (
-        <div className="w-full max-w-2xl p-4 border border-gray-200 rounded-md shadow-sm bg-white transition-all">
-          <h3 className="text-lg font-semibold mb-4">Pesquisar em:</h3>
+        <div className="absolute top-12 right-0 w-90 p-4 border border-gray-200 rounded-md shadow-sm bg-white transition-all">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold text-gray-500 text-sm">
+              Filtrar por:
+            </h3>
+            <X className="text-gray-400" onClick={toggleFilter} />
+          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="flex flex-col gap-4">
             <div>
-              <Select />
+              <Select
+                value={tempFilters.category}
+                onChange={handleCategoryChange}
+              />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 ">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Localização
               </label>
-              <Input placeholder="Onde foi visto pela última vez ou encontrado" />
+              <input
+                type="text"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm"
+                placeholder="Digite o local onde foi perdido ou achado."
+                value={tempFilters.location}
+                onChange={handleLocationChange}
+              />
             </div>
           </div>
 
-          <div className="mt-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Status
-            </label>
-            <div className="flex space-x-6">
-              <label className="flex items-center space-x-2">
-                <input type="radio" name="status" value="lost" />
-                <span>Perdido</span>
-              </label>
-              <label className="flex items-center space-x-2">
-                <input type="radio" name="status" value="found" />
-                <span>Encontrado</span>
-              </label>
-            </div>
-          </div>
-
-          <div className="mt-6 flex justify-end gap-3">
+          <div className="mt-6 flex justify-between gap-3">
             <button
               type="button"
-              onClick={handleCancelFilter}
-              className="text-gray-600 font-semibold px-4 py-2 rounded hover:bg-gray-100"
+              onClick={handleClear}
+              className="text-gray-600 font-semibold px-3 py-1 rounded hover:bg-gray-100 cursor-pointer text-sm"
             >
-              Cancelar
+              Limpar
             </button>
             <button
               type="button"
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              onClick={handleApplyFilters}
+              className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-700 cursor-pointer text-sm"
             >
               Aplicar
             </button>

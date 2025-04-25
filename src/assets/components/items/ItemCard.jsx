@@ -56,37 +56,6 @@ const ItemCard = ({ item }) => {
       
     </div>
   );
-  // return (
-  //   <div
-  //     className="bg-[#f4f4f4] shadow-md rounded-xl p-4 flex gap-4 items-start flex-col h-full"
-  //   >
-  //     <div className="flex justify-between items-start mb-2">
-  //       <div>
-  //         <h3 className="font-semibold text-lg">{item.name}</h3>
-  //         <p className="text-sm text-gray-600 w-3xs">{summary}</p>
-  //         <div>
-  //         <p>{item.responsible}</p>
-  //         </div>
-          
-  //       </div>
-  //       <div className="w-32 h-32 sm:w-40 sm:h-40 bg-gray-100 rounded-md overflow-hidden">
-  //         {item.photo ? (
-  //           <img
-  //             src={item.photo || item.image}
-  //             alt={item.name}
-  //             className="w-full h-full object-cover"
-  //           />
-  //         ) : (
-  //           <div className="w-full h-full flex items-center justify-center text-gray-400">
-  //             Sem imagem
-  //           </div>
-  //         )}
-  //       </div>
-  //     </div>
-  //     <div className="mt-auto">
-  //       <p className={statusColor}>{statusLabel}</p>
-  //     </div>
-  //   </div>
-  // );
+
 };
 export default ItemCard;
