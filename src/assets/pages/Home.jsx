@@ -126,18 +126,15 @@ function Home() {
     }
   };
   const filteredItems = items.filter((item) => {
-    const statusMap = {
-      Todos: null,
-      Encontrados: "FOUND",
-      Perdidos: "LOST",
-    };
+    const statusMap = { Todos: null, Encontrados: "FOUND", Perdidos: "LOST" };
     const mappedStatus = statusMap[filters.type];
 
     return (
       (filters.type === "Todos" || item.status === mappedStatus) &&
       (!filters.search ||
         item.name.toLowerCase().includes(filters.search.toLowerCase())) &&
-      (!filters.category || item.category === filters.category) &&
+      (!filters.categoryId ||            // ← property nova
+        Number(filters.categoryId) === item.categoryId) &&
       (!filters.location ||
         item.location.toLowerCase().includes(filters.location.toLowerCase()))
     );
@@ -230,7 +227,17 @@ function Home() {
           <ItemDetailsModal
             item={selectedItem}
             onClose={modals.details.close}
-          />
+            onEdit={(it) => {
+              setCurrentItem(it);
+              modals.details.close();
+              modals.edit.open();
+            }}
+            onDelete={(code) => {
+              setItemToDelete({ code, name: selectedItem.name });
+              modals.details.close();
+              modals.confirm.open();
+            }}
+            />
         </>
       )}
     </div>

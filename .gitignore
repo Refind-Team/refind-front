@@ -36,3 +36,5 @@ dist-ssr
 # Build e cache
 .cache/
 .temp/
+
+.env.example

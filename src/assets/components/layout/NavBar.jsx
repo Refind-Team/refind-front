@@ -2,6 +2,8 @@ import { useState } from "react";
 import { LogIn, UserPlus, Boxes, Menu, X } from "lucide-react";
 import SearchBar from "../SearchBar";
 
+const token = localStorage.getItem("token");
+
 const Navbar = ({
   filters,
   onSearch,
@@ -49,12 +51,6 @@ const Navbar = ({
               onClearFilters={onClearFilters}
             />
           </div>
-          <button className="flex items-center gap-2 text-sm font-medium text-white hover:bg-blue-600 px-4 py-2 rounded-full transition-colors">
-            <LogIn size={18} /> Login
-          </button>
-          <button className="flex items-center gap-2 text-sm font-medium bg-white text-gray-900 px-4 py-2 rounded-full shadow hover:bg-blue-600 hover:text-white transition-colors">
-            <UserPlus size={18} /> Criar conta
-          </button>
         </div>
         <button
           className="sm:hidden text-white"

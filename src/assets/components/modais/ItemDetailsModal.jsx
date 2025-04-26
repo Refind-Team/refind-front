@@ -7,108 +7,100 @@ import {
   User,
   Tag,
   Phone,
+  Pencil,
+  Trash2,
 } from "lucide-react";
+import { format } from "date-fns";
 
-const ItemDetailsModal = ({ item, onClose }) => {
-  if (!item) {
-    return null;
-  }
+const ItemDetailsModal = ({ item, onClose, onEdit, onDelete }) => {
+  if (!item) return null;
 
-  const { name, responsible, category, location, date, status, photo } = item;
-
-  const statusLabel = status === "LOST" ? "Perdido" : "Encontrado";
+  const categoryName =
+    typeof item.category === "object" ? item.category.name : item.category;
+  const statusLabel = item.status === "LOST" ? "Perdido" : "Encontrado";
+  const dateLabel = item.date
+    ? format(new Date(item.date), "dd/MM/yyyy")
+    : "Não informada";
 
   return (
     <Modal onClose={onClose}>
-      <div className="flex flex-col md:flex-row gap-6 p-4">
-        <button
-          onClick={onClose}
-          className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 focus:outline-none"
-        >
-          <svg className="h-6 w-6 fill-current" viewBox="0 0 20 20">
-            <path
-              fillRule="evenodd"
-              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-              clipRule="evenodd"
-            />
-          </svg>
-        </button>
-        {photo && (
-          <div className="w-full md:w-2/5 mb-4 md:mb-0">
+      <div className="relative flex flex-col md:flex-row gap-6 p-4">
+        <div className="absolute top-3 right-3 flex gap-2">
+          <button title="Fechar" onClick={onClose} className="text-gray-500">
+            ✕
+          </button>
+          {onEdit && (
+            <button
+              title="Editar"
+              onClick={() => onEdit(item)}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              <Pencil size={18} />
+            </button>
+          )}
+          {onDelete && (
+            <button
+              title="Excluir"
+              onClick={() => onDelete(item.code)}
+              className="text-red-500 hover:text-red-700"
+            >
+              <Trash2 size={18} />
+            </button>
+          )}
+        </div>
+
+        {item.photo && (
+          <div className="w-full md:w-2/5">
             <img
-              src={photo}
-              alt={name}
-              className="rounded-lg w-full h-auto object-cover shadow-md"
+              src={item.photo}
+              alt={item.name}
+              className="rounded-lg w-full object-cover shadow-md"
             />
           </div>
         )}
-        <div className="flex-1">
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold text-ccolor-title-subtitle">
-              {name}
-            </h2>
-          </div>
 
-          <div className="space-y-4">
-            <div className="flex items-start gap-3">
-              <User size={20} className="text-blue-500 mt-1" />
-              <div>
-                <h3 className="text-lg font-medium text-color-text">
-                  Encontrado por
-                </h3>
-                <p className="text-color-text">
-                  {responsible || "Não informado"}
-                </p>
-              </div>
-            </div>
+        <div className="flex-1 space-y-5">
+          <h2 className="text-2xl font-bold">{item.name}</h2>
 
-            <div className="flex items-start gap-3">
-              <Tag size={20} className="text-blue-500 mt-1" />
-              <div>
-                <h3 className="text-lg font-medium text-color-text">
-                  Categoria
-                </h3>
-                <p className="text-color-text">{category}</p>
-              </div>
-            </div>
+          <Detail icon={User} label="Responsável">
+            {item.user?.name || "João Paulo Almeida"}
+          </Detail>
 
-            <div className="flex items-start gap-3">
-              <MapPin size={20} className="text-blue-500 mt-1" />
-              <div>
-                <h3 className="text-lg font-medium text-color-text">
-                  Localização
-                </h3>
-                <p className="text-color-text">{location || "Não informada"}</p>
-              </div>
-            </div>
+          <Detail icon={Tag} label="Categoria">
+            {categoryName || "Não informada"}
+          </Detail>
 
-            <div className="flex items-start gap-3">
-              <CalendarFold size={20} className="text-blue-500 mt-1" />
-              <div>
-                <h3 className="text-lg font-medium text-color-text">Data</h3>
-                <p className="text-color-text">{date}</p>
-              </div>
-            </div>
+          <Detail icon={MapPin} label="Localização">
+            {item.location || "Não informada"}
+          </Detail>
 
-            <div className="flex items-start gap-3">
-              <CircleDashed size={20} className="text-blue-500" />
-              <div>
-                <h3 className="text-lg font-medium text-color-text">Status</h3>
-                <p className="text-blue-500">{statusLabel}</p>
-              </div>
-            </div>
-          </div>
+          <Detail icon={CalendarFold} label="Data">
+            {dateLabel}
+          </Detail>
 
-          <div className="mt-8">
-            <button className="flex items-center justify-center gap-2 bg-ccolor-primary text-color-white-text py-3 px-6 rounded-lg hover:bg-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 shadow-md w-full md:w-auto">
-              <Phone size={18} />
-              <span>Entrar em contato</span>
+          <Detail icon={CircleDashed} label="Status">
+            <span className="text-blue-500 font-semibold">{statusLabel}</span>
+          </Detail>
+
+          {item.contact && (
+            <button className="mt-6 flex items-center gap-2 bg-blue-500 text-white py-3 px-6 rounded-lg hover:bg-blue-600">
+              <Phone size={18} /> Entrar em contato
             </button>
-          </div>
+          )}
         </div>
       </div>
     </Modal>
   );
 };
+
+const Detail = ({ icon: Icon, label, children }) => (
+  <div className="flex items-start gap-3">
+    <Icon size={20} className="text-blue-500 mt-1" />
+    <div>
+      <h3 className="text-lg font-medium">{label}</h3>
+      <p className="text-gray-700">{children}</p>
+    </div>
+  </div>
+);
 
 export default ItemDetailsModal;
