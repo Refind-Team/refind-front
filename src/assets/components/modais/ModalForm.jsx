@@ -6,12 +6,19 @@ import Input from "../inputs/Input";
 import { useForm, Controller, FormProvider } from "react-hook-form";
 import UnifiedContactInput from "../inputs/UnifiedContactInput";
 import { itemFormValidation } from "../../../validation/formSchemas";
+import { useCategories } from "../../hooks/useCategories";
 
 const ModalForm = ({ onClose, onSave, onDelete, item, isEditing }) => {
+  const { categories, loading: catLoading, error: catError } = useCategories();
+  const categoryOptions = categories.map((c) => ({
+    label: c.name,
+    value: String(c.id),
+  }));
+
   const methods = useForm({
     defaultValues: {
       name: "",
-      category: "",
+      categoryId: "",
       date: "",
       location: "",
       responsible: "",
@@ -22,10 +29,10 @@ const ModalForm = ({ onClose, onSave, onDelete, item, isEditing }) => {
     mode: "all",
     reValidateMode: "onChange",
   });
+
   const {
     control,
     handleSubmit,
-    watch,
     reset,
     formState: { errors },
     trigger,
@@ -34,76 +41,56 @@ const ModalForm = ({ onClose, onSave, onDelete, item, isEditing }) => {
   const [file, setFile] = useState(null);
   const [submitAttempted, setSubmitAttempted] = useState(false);
 
-  const contactValue = watch("contact");
-  const isEmail = contactValue?.includes("@");
-
   useEffect(() => {
     if (isEditing && item) {
-      const translateStatusToFrontend = (status) =>
-        status === "LOST" ? "Perdido" : status === "FOUND" ? "Encontrado" : "";
-
+      const toFront = (s) => (s === "LOST" ? "Perdido" : "Encontrado");
       reset({
-        name: item.name || "",
-        category: item.category || "",
-        date: item.date || "",
-        location: item.location || "",
-        responsible: item.responsible || "",
-        contact: item.contact || item.email || "",
-        status: translateStatusToFrontend(item.status) || "",
-        photo: item.photo || null,
+        name: item.name ?? "",
+        categoryId: String(item.categoryId ?? ""),
+        date: item.date?.slice(0, 10) ?? "",
+        location: item.location ?? "",
+        responsible: item.responsible ?? "",
+        contact: item.contact ?? "",
+        status: toFront(item.status) ?? "",
+        photo: item.photo ?? null,
       });
     } else {
-      reset({
-        name: "",
-        category: "",
-        date: "",
-        location: "",
-        responsible: "",
-        contact: "",
-        status: "",
-        photo: null,
-      });
+      reset();
       setFile(null);
     }
   }, [isEditing, item, reset]);
 
   useEffect(() => {
-    if (submitAttempted) {
-      trigger();
-    }
-  }, [trigger, submitAttempted]);
+    if (submitAttempted) trigger();
+  }, [submitAttempted, trigger]);
 
-  const handleFileSelect = (selectedFile) => {
-    setFile(selectedFile);
-  };
+  const handleFileSelect = (f) => setFile(f);
 
   const onSubmit = (data) => {
-    const translateStatusToBackend = (status) =>
-      status === "Perdido" ? "LOST" : "FOUND";
+    const toBack = (s) => (s === "Perdido" ? "LOST" : "FOUND");
 
-    const prepareAndSubmit = (base64Image = null) => {
-      const isEmailValue = data.contact.includes("@");
-      const itemData = {
-        ...data,
-        email: isEmailValue ? data.contact : "",
-        contact: isEmailValue ? "" : data.contact,
-        status: translateStatusToBackend(data.status),
-        photo: base64Image,
+    const send = (base64 = null) => {
+      const payload = {
+        name: data.name,
+        categoryId: Number(data.categoryId),
+        date: data.date,
+        location: data.location,
+        responsible: data.responsible,
+        contact: data.contact,
+        status: toBack(data.status),
+        photo: base64,
       };
 
-      if (isEditing && item) {
-        itemData.id = item.id;
-      }
-      onSave(itemData);
+      if (isEditing && item) payload.code = item.code;
+      onSave(payload);
     };
+
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        prepareAndSubmit(reader.result);
-      };
+      reader.onloadend = () => send(reader.result);
       reader.readAsDataURL(file);
     } else {
-      prepareAndSubmit(data.photo || null);
+      send(data.photo || null);
     }
   };
 
@@ -125,6 +112,7 @@ const ModalForm = ({ onClose, onSave, onDelete, item, isEditing }) => {
           ✕
         </button>
       </div>
+
       <div className="max-h-[80vh] overflow-y-auto px-1 py-2">
         <FormProvider {...methods}>
           <form onSubmit={handleFormSubmit} noValidate>
@@ -146,14 +134,25 @@ const ModalForm = ({ onClose, onSave, onDelete, item, isEditing }) => {
 
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="w-full sm:w-1/2">
-                <Controller
-                  name="category"
-                  control={control}
-                  rules={itemFormValidation.category}
-                  render={({ field }) => (
-                    <Select {...field} error={errors.category?.message} />
-                  )}
-                />
+                {catLoading ? (
+                  <p className="text-sm text-gray-500">Carregando categorias...</p>
+                ) : catError ? (
+                  <p className="text-sm text-red-500">{catError}</p>
+                ) : (
+                  <Controller
+                    name="categoryId"
+                    control={control}
+                    rules={itemFormValidation.categoryId}
+                    render={({ field }) => (
+                      <Select
+                        label="Categoria"
+                        options={categoryOptions}
+                        {...field}
+                        error={errors.categoryId?.message}
+                      />
+                    )}
+                  />
+                )}
               </div>
               <div className="w-full sm:w-1/2">
                 <Controller
@@ -172,6 +171,7 @@ const ModalForm = ({ onClose, onSave, onDelete, item, isEditing }) => {
                 />
               </div>
             </div>
+
             <Controller
               name="location"
               control={control}
@@ -180,13 +180,14 @@ const ModalForm = ({ onClose, onSave, onDelete, item, isEditing }) => {
                 <Input
                   label="Localização"
                   id="location"
-                  placeholder="Onde foi visto pela última vez ou encontrado"
+                  placeholder="Onde foi visto/encontrado"
                   type="text"
                   {...field}
                   error={errors.location?.message}
                 />
               )}
             />
+
             <Controller
               name="responsible"
               control={control}
@@ -195,18 +196,15 @@ const ModalForm = ({ onClose, onSave, onDelete, item, isEditing }) => {
                 <Input
                   label="Responsável"
                   id="responsible"
-                  placeholder="Digite seu telefone ou e-mail"
+                  placeholder="Nome do responsável"
                   type="text"
                   {...field}
                   error={errors.responsible?.message}
                 />
               )}
             />
-            <UnifiedContactInput
-              control={control}
-              name="contact"
-              errors={errors}
-            />
+
+            <UnifiedContactInput control={control} name="contact" errors={errors} />
 
             <div className="mb-6">
               <label className="block text-sm font-semibold text-gray-900 mb-2">
@@ -218,32 +216,28 @@ const ModalForm = ({ onClose, onSave, onDelete, item, isEditing }) => {
                 rules={itemFormValidation.status}
                 render={({ field }) => (
                   <div className="flex space-x-4">
-                    {["Perdido", "Encontrado"].map((option) => (
-                      <label
-                        key={option}
-                        className="flex items-center space-x-2"
-                      >
+                    {["Perdido", "Encontrado"].map((opt) => (
+                      <label key={opt} className="flex items-center space-x-2">
                         <input
                           type="radio"
                           {...field}
-                          value={option}
-                          checked={field.value === option}
+                          value={opt}
+                          checked={field.value === opt}
                           className="text-blue-600 focus:ring-blue-500"
                         />
-                        <span>{option}</span>
+                        <span>{opt}</span>
                       </label>
                     ))}
                   </div>
                 )}
               />
               {errors.status && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.status.message}
-                </p>
+                <p className="text-red-500 text-sm mt-1">{errors.status.message}</p>
               )}
             </div>
+
             <div className="mt-4">
-              <label className="block font-sm mb-1 text-gray-900 font-semibold">
+              <label className="block text-sm font-semibold text-gray-900 mb-1">
                 Imagem
               </label>
               <FileUpload onFileSelect={handleFileSelect} />
@@ -264,7 +258,7 @@ const ModalForm = ({ onClose, onSave, onDelete, item, isEditing }) => {
                 <button
                   type="button"
                   onClick={onClose}
-                  className="text-gray-900 px-4 py-2 font-semibold cursor-pointer"
+                  className="text-gray-900 px-4 py-2 font-semibold"
                 >
                   Cancelar
                 </button>
@@ -272,7 +266,7 @@ const ModalForm = ({ onClose, onSave, onDelete, item, isEditing }) => {
                   <button
                     type="button"
                     onClick={() => onDelete(item.code)}
-                    className="text-red-600 px-4 py-2 font-semibold cursor-pointer"
+                    className="text-red-600 px-4 py-2 font-semibold"
                   >
                     Excluir
                   </button>
@@ -280,7 +274,7 @@ const ModalForm = ({ onClose, onSave, onDelete, item, isEditing }) => {
               </div>
               <button
                 type="submit"
-                className="bg-blue-600 text-white px-4 py-2 rounded cursor-pointer"
+                className="bg-blue-600 text-white px-4 py-2 rounded"
               >
                 {isEditing ? "Salvar" : "Cadastrar"}
               </button>
@@ -291,4 +285,5 @@ const ModalForm = ({ onClose, onSave, onDelete, item, isEditing }) => {
     </Modal>
   );
 };
+
 export default ModalForm;
