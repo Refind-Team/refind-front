@@ -39,8 +39,7 @@ export default function Login() {
             Entrar
           </button>
         </form>
-        <div className="flex justify-between mt-4 text-sm">
-          <Link to="/forgot-password" className="text-blue-600 hover:underline">Esqueceu a senha?</Link>
+        <div className="flex justify-center mt-4 text-sm">
           <Link to="/register" className="text-blue-600 hover:underline">Criar conta</Link>
         </div>
       </div>

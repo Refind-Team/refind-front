@@ -1,4 +1,3 @@
-// src/assets/components/inputs/Select.jsx
 import { ChevronDown } from "lucide-react";
 
 const Select = ({ label, options, value, onChange, error }) => {

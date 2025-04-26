@@ -1,4 +1,3 @@
-// src/validation/formSchemas.js
 export const itemFormValidation = {
   name: {
     required: "O título é obrigatório",

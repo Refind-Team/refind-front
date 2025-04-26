@@ -14,7 +14,6 @@ import { useItems } from "../hooks/useItems";
 import { useModals } from "../hooks/useModals";
 
 function Home() {
-  //hooks
   const {
     items,
     loading,
@@ -27,7 +26,6 @@ function Home() {
 
   const { modals, savedItemInfo } = useModals();
 
-  // State local
   const [currentItem, setCurrentItem] = useState(null);
   const [accessCode, setAccessCode] = useState("");
   const [selectedItem, setSelectedItem] = useState(null);
@@ -58,7 +56,6 @@ function Home() {
       location: "",
     }));
   };
-  // Handlers
   const handleViewDetails = (item) => {
     setSelectedItem(item);
     modals.details.open();
@@ -74,7 +71,9 @@ function Home() {
       if (currentItem) {
         const response = await updateItem(currentItem.code, itemData);
         if (response.success) {
+          setSelectedItem(response.data);
           modals.edit.close();
+          modals.details.open();
         }
       } else {
         const response = await addItem(itemData);

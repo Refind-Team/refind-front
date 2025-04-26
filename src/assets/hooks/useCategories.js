@@ -1,4 +1,3 @@
-// src/hooks/useCategories.js
 import { useState, useEffect } from "react";
 import { categoryService } from "../services/categoryService";
 

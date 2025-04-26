@@ -50,7 +50,6 @@ export const mockItemService = {
     }
     return Promise.resolve({ success: false, message: "Item não encontrado" });
   },
-  // Deletar item
   deleteItem: (code) => {
     const items = JSON.parse(localStorage.getItem('items') || '[]');
     const newItems = items.filter(item => item.code !== code);

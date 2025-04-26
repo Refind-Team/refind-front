@@ -14,7 +14,6 @@ export default function Register() {
       await authService.register(data.name, data.phone, data.email, data.password);
       setSuccessMsg("Conta criada com sucesso! Você já pode fazer login.");
       setErrorMsg("");
-      // Redireciona para a tela de login após 2 segundos
       setTimeout(() => navigate("/"), 2000);
     } catch (err) {
       const msg = err?.response?.data?.error 

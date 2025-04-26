@@ -1,4 +1,3 @@
-// src/hooks/useItems.js
 import { useState, useEffect } from "react";
 import { itemService } from "../services/itemService";
 
@@ -7,7 +6,6 @@ export function useItems() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // carrega todos os itens do backend
   const loadItems = async () => {
     setLoading(true);
     try {
@@ -26,7 +24,6 @@ export function useItems() {
     loadItems();
   }, []);
 
-  // cria um item e retorna { success, data?, error? }
   const addItem = async (itemData) => {
     setLoading(true);
     try {
@@ -41,7 +38,6 @@ export function useItems() {
     }
   };
 
-  // atualiza um item e retorna { success, data?, error? }
   const updateItem = async (code, data) => {
     setLoading(true);
     try {
@@ -56,7 +52,6 @@ export function useItems() {
     }
   };
 
-  // deleta um item e retorna { success, error? }
   const deleteItem = async (code) => {
     setLoading(true);
     try {
@@ -71,7 +66,6 @@ export function useItems() {
     }
   };
 
-  // busca um item por código
   const getItemByCode = async (code) => {
     try {
       return await itemService.getByCode(code);

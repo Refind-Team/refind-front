@@ -63,7 +63,7 @@ const ItemDetailsModal = ({ item, onClose, onEdit, onDelete }) => {
           <h2 className="text-2xl font-bold">{item.name}</h2>
 
           <Detail icon={User} label="Responsável">
-            {item.user?.name || "João Paulo Almeida"}
+            {item.user || "João Paulo Almeida"}
           </Detail>
 
           <Detail icon={Tag} label="Categoria">

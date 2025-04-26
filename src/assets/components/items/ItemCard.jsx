@@ -1,5 +1,5 @@
 import React from "react";
-import { format } from "date-fns";          // ← novo
+import { format } from "date-fns";     
 
 const ItemCard = ({ item }) => {
   const statusLabel = item.status === "LOST" ? "Perdido" : "Encontrado";
@@ -8,7 +8,6 @@ const ItemCard = ({ item }) => {
     ? "bg-red-100 text-red-700"
     : "bg-green-100 text-green-700";
 
-  /* formata data se existir */
   const dateLabel =
     item.date ? format(new Date(item.date), "dd/MM/yyyy") : null;
 

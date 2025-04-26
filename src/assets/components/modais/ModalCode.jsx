@@ -1,73 +1,47 @@
+import React, { useState } from "react";
 import Modal from "./Modal";
-import { RotateCcwKey } from "lucide-react";
 import Input from "../inputs/Input";
-import { useState } from "react";
 
 const ModalCode = ({ onClose, onAccess, code, setCode }) => {
   const [error, setError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const validateCode = () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     setError("");
-
-    if (!code || code.trim() === "") {
-      setError("O código não pode estar vazio.");
-      return false;
+    const ok = await onAccess();
+    if (!ok) {
+      setError("Código não encontrado");
     }
-
-    return true;
   };
 
-  const handleAccess = async () => {
-    if (!validateCode()) return;
-
-    setIsSubmitting(true);
-    const success = await onAccess();
-    if (!success) {
-      setError("Código não encontrado ou erro ao acessar");
-    }
-    setIsSubmitting(false);
-  };
-  
   return (
-    <Modal onClose={onClose} maxWidth="sm">
-      <div className="px-2 py-2 sm:px-4">
-        <div className="flex justify-center sm:justify-start mb-4">
-          <RotateCcwKey className="text-blue-500 w-10 h-10 sm:w-12 sm:h-12" />
-        </div>
-        <h2 className="text-lg font-bold text-center sm:text-left mb-4">
-          Acessar registro com código
-        </h2>
+    <Modal onClose={onClose}>
+      <form onSubmit={handleSubmit} className="space-y-4 p-4">
+        <h2 className="text-lg font-bold">Acessar registro com código</h2>
         <Input
-          type="text"
+          id="access-code"
+          label="Digite o código"
+          placeholder="Ex: ABC123"
           value={code}
-          onChange={(e) => {
-            setCode(e.target.value);
-            if (error) validateCode();
-          }}
-          placeholder="Digite o código"
-          className={error ? "border-red-500" : ""}
+          onChange={(e) => setCode(e.target.value.trim())}
+          error={error}
         />
-        {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
-        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-4 mt-6">
+        <div className="flex justify-end gap-2">
           <button
+            type="button"
             onClick={onClose}
-            className="text-gray-700 font-semibold py-2"
-            disabled={isSubmitting}
+            className="px-4 py-2 rounded border"
           >
             Cancelar
           </button>
           <button
-            onClick={handleAccess}
-            className={`${
-              isSubmitting ? "bg-blue-300" : "bg-blue-500"
-            } text-white px-4 py-2 rounded font-semibold`}
-            disabled={isSubmitting}
+            type="submit"
+            className="px-4 py-2 rounded bg-blue-600 text-white"
           >
-            {isSubmitting ? "Verificando..." : "Acessar"}
+            Acessar
           </button>
         </div>
-      </div>
+      </form>
     </Modal>
   );
 };
